@@ -1,23 +1,25 @@
 "use client";
 
 import { useState } from 'react';
-import ImageDropzone from '@/components/ImageDropzone';
-import ConversionResult from '@/components/ConversionResult';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import PdfToJpgResult from '../../components/PdfToJpgResult';
+import { ConvertedPdfImage } from '../../types/pdf';
 
-export interface ConvertedImage {
-  name: string;
-  originalSize: number;
-  webpSize: number;
-  url: string;
-  originalUrl: string;
-}
+const PdfToJpgDropzone = dynamic(() => import('../../components/PdfToJpgDropzone'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-64 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
+      <div className="text-gray-500">Loading converter...</div>
+    </div>
+  ),
+});
 
-export default function Home() {
-  const [convertedImages, setConvertedImages] = useState<ConvertedImage[]>([]);
+export default function PdfToJpgPage() {
+  const [convertedImages, setConvertedImages] = useState<ConvertedPdfImage[]>([]);
   const [isConverting, setIsConverting] = useState(false);
 
-  const handleImagesConverted = (images: ConvertedImage[]) => {
+  const handleImagesConverted = (images: ConvertedPdfImage[]) => {
     setConvertedImages(prev => [...prev, ...images]);
   };
 
@@ -33,17 +35,17 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
             <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
               <h1 className="text-lg sm:text-xl font-medium text-black">
-                Image to WebP Converter
+                PDF to JPG Converter
               </h1>
               <div className="flex space-x-2 text-sm">
-                <span className="text-black">WebP Converter</span>
-                <span className="text-gray-400">•</span>
                 <Link 
-                  href="/remove-bg" 
+                  href="/" 
                   className="text-gray-600 hover:text-black transition-colors"
                 >
-                  Remove Background
+                  WebP Converter
                 </Link>
+                <span className="text-gray-400">•</span>
+                <span className="text-black">PDF to JPG</span>
               </div>
             </div>
             <a 
@@ -63,17 +65,17 @@ export default function Home() {
         {/* Hero Section */}
         <div className="text-center mb-12 sm:mb-16">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-medium text-black mb-4 sm:mb-6 leading-tight">
-            Convert Images to WebP
+            Convert PDF to JPG
           </h2>
           <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed px-4 sm:px-0">
-            Reduce your image file sizes by up to 80% while maintaining quality. 
-            Support for single images and bulk conversion via ZIP files.
+            Turn your PDF documents into high-quality JPG images instantly.
+            Perfect for sharing, editing, and viewing on any device.
           </p>
         </div>
 
         {/* Dropzone */}
         <div className="mb-12 sm:mb-16">
-          <ImageDropzone 
+          <PdfToJpgDropzone 
             onImagesConverted={handleImagesConverted}
             isConverting={isConverting}
             setIsConverting={setIsConverting}
@@ -85,7 +87,7 @@ export default function Home() {
           <div className="space-y-6 sm:space-y-8">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
               <h3 className="text-xl sm:text-2xl font-medium text-black">
-                Results ({convertedImages.length} {convertedImages.length === 1 ? 'image' : 'images'})
+                Results ({convertedImages.length} {convertedImages.length === 1 ? 'page' : 'pages'})
               </h3>
               <button 
                 className="text-sm text-gray-600 hover:text-black transition-colors border border-gray-300 px-4 py-2 rounded-md hover:border-gray-400 self-start sm:self-auto"
@@ -95,56 +97,40 @@ export default function Home() {
               </button>
             </div>
             
-            <ConversionResult images={convertedImages} />
+            <PdfToJpgResult images={convertedImages} />
           </div>
         )}
 
         {/* Features */}
         <div className="mt-16 sm:mt-24 pt-12 sm:pt-16 border-t border-gray-200">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-12">
-            <Link 
-              href="/remove-bg" 
-              className="group relative bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <div className="text-6xl">✂️</div>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-4 text-lg">
+                ⚡
               </div>
-              <div className="relative z-10">
-                <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mb-4 text-xl group-hover:scale-110 transition-transform duration-300">
-                  ✂️
-                </div>
-                <h3 className="text-lg font-medium text-black mb-2">Remove Background</h3>
-                <p className="text-sm text-gray-600">
-                  Remove image backgrounds instantly using AI
-                </p>
-              </div>
-            </Link>
-
-            <Link 
-              href="/pdf-to-jpg" 
-              className="group relative bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <div className="text-6xl">📄</div>
-              </div>
-              <div className="relative z-10">
-                <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mb-4 text-xl group-hover:scale-110 transition-transform duration-300">
-                  📄
-                </div>
-                <h3 className="text-lg font-medium text-black mb-2">PDF to JPG</h3>
-                <p className="text-sm text-gray-600">
-                  Convert PDF documents to high-quality JPG images
-                </p>
-              </div>
-            </Link>
+              <h3 className="text-lg font-medium text-black mb-2">Fast Conversion</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Convert multi-page PDFs to images in seconds
+              </p>
+            </div>
             
-            <div className="text-center sm:col-span-2 md:col-span-1">
+            <div className="text-center">
               <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-4 text-lg">
                 🔒
               </div>
-              <h3 className="text-lg font-medium text-black mb-2">Privacy First</h3>
+              <h3 className="text-lg font-medium text-black mb-2">Secure & Private</h3>
               <p className="text-gray-600 text-sm leading-relaxed">
-                All processing happens in your browser
+                Files are processed locally in your browser
+              </p>
+            </div>
+            
+            <div className="text-center sm:col-span-2 md:col-span-1">
+              <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-4 text-lg">
+                ✨
+              </div>
+              <h3 className="text-lg font-medium text-black mb-2">High Quality</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Get crisp, clear JPG images from your documents
               </p>
             </div>
           </div>
